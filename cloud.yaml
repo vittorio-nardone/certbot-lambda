@@ -1,0 +1,100 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: CERBOT in Lambda Functions - Request & Renew Certs in ACM for CloudFront/S3 hosting
+    
+Parameters:
+    BucketName:
+        Description: S3 Bucket (Cerbot configuration tree and lambda source package)
+        Type: String    
+
+    SourceFolder:
+        Description: folder in S3 Bucket where source package is located 
+        Type: String
+        Default: "src"
+
+    DomainList:
+        Description: list of managed domains in csv format (cert request and renewal process) 
+        Type: String
+        Default: ""
+
+    DomainEmail:
+        Description: email address used in cert request
+        Type: String
+        Default: ""   
+        
+    CertRenewDays:
+        Description: number of days before cert expiration to request renew
+        Type: String
+        Default: "30"
+
+Resources:
+
+    CertbotFunctionRole:
+        Type: AWS::IAM::Role
+        Properties:
+            AssumeRolePolicyDocument:
+                Version: '2012-10-17'
+                Statement:
+                -   Effect: Allow
+                    Principal:
+                        Service:
+                        - lambda.amazonaws.com
+                    Action:
+                    - sts:AssumeRole
+            Policies:
+                -   PolicyName: Allow-logs
+                    PolicyDocument:
+                        Version: '2012-10-17'
+                        Statement:
+                        -   Effect: Allow
+                            Action:
+                            - 'logs:CreateLogGroup'
+                            - 'logs:CreateLogStream'
+                            - 'logs:PutLogEvents'
+                            Resource: arn:aws:logs:*:*:*   
+                -   PolicyName: BucketGetPutObject
+                    PolicyDocument:
+                        Version: '2012-10-17'
+                        Statement:
+                        -   Effect: Allow
+                            Action:
+                            - 's3:GetObject'
+                            - 's3:PutObject'
+                            Resource: 
+                                Fn::Join: ["", ["arn:aws:s3:::", Ref: "BucketName", "/*"]] 
+                -   PolicyName: ACMGetImportCerts
+                    PolicyDocument:
+                        Version: '2012-10-17'
+                        Statement:
+                        -   Effect: Allow
+                            Action:
+                            - 'acm:DescribeCertificate'
+                            - 'acm:ListCertificates'
+                            - 'acm:ImportCertificate'
+                            Resource: "*"
+
+    CertbotFunction:
+        Type: AWS::Lambda::Function
+        Properties:
+            Runtime: python3.6
+            Description: Request and Renew Certs in ACM for CloudFront-S3 hosting
+            Handler: lambda_function.lambda_handler
+            Role: 
+                Fn::GetAtt: [ "CertbotFunctionRole", "Arn" ]
+            Environment:
+                Variables:
+                    CERTBOT_BUCKET:
+                        Ref: BucketName
+                    CERTBOT_OBJECT: "certbot_backup.zip"
+                    DOMAINS_EMAIL:
+                        Ref: DomainEmail
+                    DOMAINS_LIST:
+                        Ref: DomainList
+                    CERTS_RENEW_DAYS_BEFORE_EXPIRATION:
+                        Ref: CertRenewDays
+            Timeout: 60
+            MemorySize: 512
+            Code:
+                S3Bucket: 
+                    Ref: BucketName
+                S3Key: 
+                    Fn::Sub: '${SourceFolder}/CertbotFunction.zip'
