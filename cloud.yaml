@@ -98,3 +98,30 @@ Resources:
                     Ref: BucketName
                 S3Key: 
                     Fn::Sub: '${SourceFolder}/CertbotFunction.zip'
+
+
+    CertbotFunctionEvent:
+        Type: AWS::Events::Rule
+        Properties: 
+            Description: "Invoke CerbotFunction"
+            ScheduleExpression: "rate(1 day)"
+            State: "ENABLED"
+            Targets: 
+              - 
+                Arn: 
+                  Fn::GetAtt: 
+                    - "CertbotFunction"
+                    - "Arn"
+                Id: "TargetCertbotFunction"
+
+    CertbotFunctionEventPermission:
+        Type: AWS::Lambda::Permission
+        Properties: 
+            FunctionName: 
+                Ref: "CertbotFunction"
+            Action: "lambda:InvokeFunction"
+            Principal: "events.amazonaws.com"
+            SourceArn: 
+                Fn::GetAtt: 
+                    - "CertbotFunctionEvent"
+                    - "Arn"
