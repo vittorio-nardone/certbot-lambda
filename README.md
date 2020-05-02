@@ -10,6 +10,11 @@ A lambda function to get and renew FREE SSL certificates using Cerbots. I'm usin
 * CloudWatch daily event to check if renew is needed
 * CloudFormation template to build stack
 
+## Instructions
+
+Use `make lambda-build` to build lambda source package.
+
+Use `make BUCKET=your_bucket_name create-stack` to upload source package in a bucket and deploy CloudFormation stack.
 
 
 
