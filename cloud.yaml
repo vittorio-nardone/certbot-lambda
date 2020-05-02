@@ -1,9 +1,9 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: CERBOT in Lambda Functions - Request & Renew Certs in ACM for CloudFront/S3 hosting
+Description: CERTBOT in Lambda Functions - Request & Renew Certs in ACM for CloudFront/S3 hosting
     
 Parameters:
     BucketName:
-        Description: S3 Bucket (Cerbot configuration tree and lambda source package)
+        Description: S3 Bucket (Certbot configuration tree and lambda source package)
         Type: String    
 
     SourceFolder:
@@ -103,7 +103,7 @@ Resources:
     CertbotFunctionEvent:
         Type: AWS::Events::Rule
         Properties: 
-            Description: "Invoke CerbotFunction"
+            Description: "Invoke CertbotFunction"
             ScheduleExpression: "rate(1 day)"
             State: "ENABLED"
             Targets: 
