@@ -26,6 +26,14 @@ Parameters:
         Type: String
         Default: "30"
 
+    CertbotEnvironment:
+        Description: set Certbot environment
+        Type: String
+        Default: "staging"
+        AllowedValues:
+            - "staging"
+            - "production"
+
 Resources:
 
     CertbotFunctionRole:
@@ -91,6 +99,8 @@ Resources:
                         Ref: DomainList
                     CERTS_RENEW_DAYS_BEFORE_EXPIRATION:
                         Ref: CertRenewDays
+                    CERTBOT_ENV:
+                        Ref: CertbotEnvironment
             Timeout: 60
             MemorySize: 512
             Code:

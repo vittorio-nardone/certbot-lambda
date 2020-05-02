@@ -83,15 +83,17 @@ def request_certs(emails, domains):
         # Email of domain administrators
         '--email', emails,
 
-        # Stage or Prod?
-        '--server', CERTBOT_SERVER,
-
         # Validation scripts
         '--manual-auth-hook', 'python auth-hook.py',
         '--manual-cleanup-hook', 'python cleanup-hook.py',
         '--preferred-challenges', 'http',
 
     ]
+
+    # Stage or Prod?
+    if os.environ['CERTBOT_ENV'] == 'staging':
+        certbot_args.extend(['--server', CERTBOT_SERVER])
+
     certbot.main.main(certbot_args)
 
 def zipdir(path, ziph):
@@ -179,7 +181,10 @@ def lambda_handler(event, context):
     # Check domain list
     if (os.environ['DOMAINS_LIST'] != '') and (os.environ['DOMAINS_EMAIL'] != ''):
             
-        logger.info("Using Certbot server {}".format(CERTBOT_SERVER))
+        # Stage or Prod?
+        if os.environ['CERTBOT_ENV'] == 'staging':
+            logger.info("Using Certbot staging server {}".format(CERTBOT_SERVER))
+            
         logger.info("Domain list is {}".format(os.environ['DOMAINS_LIST']))
 
         certs_new, certs_renew, certs_imported, certs_skipped = 0,0,0,0
