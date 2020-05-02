@@ -4,9 +4,6 @@ clean:
 	@rm -rf __pycache__
 
 ## prepares build.zip archive for AWS Lambda deploy 
-## remember to set in lambda definition:
-##		 PYTHONPATH : "/var/task/src:/var/task/lib" 
-## 		 Handler: src/lambda_function.lambda_handler
 lambda-build: clean 
 	cp lib/certbot-1.3.0.zip ./build.zip
 	zip build.zip *.py 
