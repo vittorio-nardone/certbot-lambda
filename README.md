@@ -16,7 +16,7 @@ Use `make lambda-build` to build lambda source package.
 
 Use `make BUCKET=your_bucket_name create-stack` to upload source package in a bucket and deploy CloudFormation stack.
 
-
+More deatails on [this post](https://www.vittorionardone.it/en/2020/04/29/free-ssl-certificates-with-certbot-in-aws-lambda/) of my Digital Transformation Blog.
 
 
 
